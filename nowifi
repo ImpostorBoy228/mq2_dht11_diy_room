@@ -1,0 +1,63 @@
+#include <DHT.h>
+
+const int gasPin = 36;
+const int irLedPin = 19;  // IR LED for window control
+const int relayPin = 14;  // Relay for humidity control
+DHT dht(4, DHT11);
+
+void setup() {
+  pinMode(gasPin, INPUT);
+  pinMode(irLedPin, OUTPUT);
+  pinMode(relayPin, OUTPUT);
+  
+  digitalWrite(relayPin, LOW); // Initial state of relay
+  
+  dht.begin();
+
+  Serial.begin(115200);
+}
+
+void loop() {
+  // Read raw analog value
+  int raw_adc = analogRead(gasPin);
+  Serial.print("Raw analog value: ");
+  Serial.println(raw_adc);
+
+  // Condition to control IR LED (window)
+  if (raw_adc > 3000) { // Example threshold
+    digitalWrite(irLedPin, HIGH); // Open window
+    Serial.println("window ON");
+  } else if (raw_adc < 1500) {
+    digitalWrite(irLedPin, LOW); // Close window
+    Serial.println("window OFF");
+  }
+
+  delay(100);
+
+  int h = dht.readHumidity();
+  int t = dht.readTemperature();
+
+  if (isnan(h) || isnan(t)) {
+    Serial.println(F("Failed to read from DHT sensor!"));
+    return;
+  }
+
+  // Log temperature and humidity
+  Serial.print("Temperature: ");
+  Serial.print(t);
+  Serial.println("°C");
+  Serial.print("Humidity: ");
+  Serial.print(h);
+  Serial.println("%");
+
+  // Condition to control relay (humidity)
+  if (h <= 45) {
+    digitalWrite(relayPin, HIGH); // Turn on relay
+    Serial.println("Relay ON");
+    delay(40);
+  } else if (h >= 55) {
+    digitalWrite(relayPin, LOW); // Turn off relay
+    Serial.println("Relay OFF");
+    delay(40);
+  }
+}
