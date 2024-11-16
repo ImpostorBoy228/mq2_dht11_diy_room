@@ -6,12 +6,12 @@ from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, C
 from aiogram.filters import Command
 
 # Telegram bot token
-TELEGRAM_BOT_TOKEN = "7840895206:AAF-9eQsrS9puygcpzeQ0BP8-Spf_sP1z9A"
+TELEGRAM_BOT_TOKEN = "*********"
 
 # Firebase setup
 cred = credentials.Certificate("./google-services.json")  # Файл в той же папке, что и этот скрипт
 firebase_admin.initialize_app(cred, {
-    'databaseURL': "https://sus-iot-default-rtdb.asia-southeast1.firebasedatabase.app"
+    'databaseURL': "************"
 })
 
 # Initialize bot and dispatcher
