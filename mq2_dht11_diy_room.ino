@@ -1,4 +1,4 @@
-#include <WiFi.h>
+#include <WiFi.h> 
 #include <Firebase_ESP_Client.h>
 #include <DHT.h>
 
@@ -31,19 +31,24 @@ FirebaseConfig config;
 unsigned long sendDataPrevMillis = 0;
 
 const int gasPin = 36;
+const int irLedPin = 19;  // IR LED for window control
+const int relayPin = 14;  // Relay for humidity control
 DHT dht(4, DHT11);
 
-void setup()
-{
+void setup() {
   pinMode(gasPin, INPUT);
+  pinMode(irLedPin, OUTPUT);
+  pinMode(relayPin, OUTPUT);
+  
+  digitalWrite(relayPin, LOW); // Initial state of relay
+  
   dht.begin();
 
   Serial.begin(115200);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
   Serial.print("Connecting to Wi-Fi");
-  while (WiFi.status() != WL_CONNECTED)
-  {
+  while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
     delay(300);
   }
@@ -68,37 +73,58 @@ void setup()
   Firebase.reconnectNetwork(true);
 
   fbdo.setBSSLBufferSize(4096, 1024);
-
   fbdo.setResponseSize(2048);
 
   Firebase.begin(&config, &auth);
 
   Firebase.setDoubleDigits(5);
-
   config.timeout.serverResponse = 10 * 1000;
 }
 
-void loop()
-{
-  if (Firebase.ready() && (millis() - sendDataPrevMillis > 10 || sendDataPrevMillis == 0))
-  {
+void loop() {
+  if (Firebase.ready() && (millis() - sendDataPrevMillis > 200 || sendDataPrevMillis == 0)) {
     sendDataPrevMillis = millis();
 
-    // Считываем аналоговое значение с gasPin
-    int gasValue = analogRead(gasPin);
-    Serial.printf("Gas Value: %d\n", gasValue);
-    Serial.printf("Firebase update status: %s\n", Firebase.RTDB.setInt(&fbdo, F("/house/gas-value"), gasValue) ? "ok" : fbdo.errorReason().c_str());
+    // Read raw analog value
+    int raw_adc = analogRead(gasPin);
+    Serial.print("Raw analog value: ");
+    Serial.println(raw_adc);
+
+    // Send raw analog value to Firebase
+    Firebase.RTDB.setInt(&fbdo, F("/house/raw_value"), raw_adc);
+
+    // Condition to control IR LED (window)
+    if (raw_adc > 3000) { // Example threshold
+      digitalWrite(irLedPin, HIGH); // Open window
+      Serial.println("window ON");
+    } else if (raw_adc < 1500) {
+      digitalWrite(irLedPin, LOW); // Close window
+      Serial.println("window OFF");
+    }
 
     delay(100);
 
-    float h = dht.readHumidity();
-    float t = dht.readTemperature();
+    int h = dht.readHumidity();
+    int t = dht.readTemperature();
 
     if (isnan(h) || isnan(t)) {
       Serial.println(F("Failed to read from DHT sensor!"));
       return;
     }
-    Serial.printf("Temperature: %s\n", Firebase.RTDB.setFloat(&fbdo, F("/house/temp"), t) ? "ok" : fbdo.errorReason().c_str());
-    Serial.printf("Humidity: %s\n", Firebase.RTDB.setFloat(&fbdo, F("/house/humidity"), h) ? "ok" : fbdo.errorReason().c_str());
+
+    // Send temperature and humidity to Firebase
+    Firebase.RTDB.setInt(&fbdo, F("/house/temp"), t);
+    Firebase.RTDB.setInt(&fbdo, F("/house/humidity"), h);
+
+    // Condition to control relay (humidity)
+    if (h <= 45) {
+      digitalWrite(relayPin, HIGH); // Turn on relay
+      Serial.println("Relay ON");
+      delay(40);
+    } else if (h >= 55) {
+      digitalWrite(relayPin, LOW); // Turn off relay
+      Serial.println("Relay OFF");
+      delay(40);
+    }
   }
 }
