@@ -9,18 +9,18 @@
 #include <addons/RTDBHelper.h>
 
 /* 1. Define the WiFi credentials */
-#define WIFI_SSID "Shamoni_14"
-#define WIFI_PASSWORD "57075707"
+#define WIFI_SSID "************"
+#define WIFI_PASSWORD "*****************"
 
 /* 2. Define the API Key */
-#define API_KEY "AIzaSyAMa9C2EXcZ9ULgLq0tYUuK3ftCviA3Hj0"
+#define API_KEY "**********************"
 
 /* 3. Define the RTDB URL */
-#define DATABASE_URL "https://sus-iot-default-rtdb.asia-southeast1.firebasedatabase.app/" 
+#define DATABASE_URL "**********************" 
 
 /* 4. Define the user Email and password that already registered or added in your project */
-#define USER_EMAIL "susman209290@gmail.com"
-#define USER_PASSWORD "linux/etc"
+#define USER_EMAIL "*************"
+#define USER_PASSWORD "*****"
 
 // Define Firebase Data object
 FirebaseData fbdo;
