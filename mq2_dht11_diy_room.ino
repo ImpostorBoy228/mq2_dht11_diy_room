@@ -94,10 +94,10 @@ void loop() {
     Firebase.RTDB.setInt(&fbdo, F("/house/raw_value"), raw_adc);
 
     // Condition to control IR LED (window)
-    if (raw_adc > 3000) { // Example threshold
+    if (raw_adc > 700) { // Example threshold
       digitalWrite(irLedPin, HIGH); // Open window
       Serial.println("window ON");
-    } else if (raw_adc < 1500) {
+    } else if (raw_adc < 350) {
       digitalWrite(irLedPin, LOW); // Close window
       Serial.println("window OFF");
     }
@@ -117,11 +117,11 @@ void loop() {
     Firebase.RTDB.setInt(&fbdo, F("/house/humidity"), h);
 
     // Condition to control relay (humidity)
-    if (h <= 45) {
+    if (h <= 34) {
       digitalWrite(relayPin, HIGH); // Turn on relay
       Serial.println("Relay ON");
       delay(40);
-    } else if (h >= 55) {
+    } else if (h >= 37) {
       digitalWrite(relayPin, LOW); // Turn off relay
       Serial.println("Relay OFF");
       delay(40);
