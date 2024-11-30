@@ -9,18 +9,18 @@
 #include <addons/RTDBHelper.h>
 
 /* 1. Define the WiFi credentials */
-#define WIFI_SSID "************"
-#define WIFI_PASSWORD "*****************"
+#define WIFI_SSID "*********"
+#define WIFI_PASSWORD "***********"
 
 /* 2. Define the API Key */
-#define API_KEY "**********************"
+#define API_KEY "**************"
 
 /* 3. Define the RTDB URL */
-#define DATABASE_URL "**********************" 
+#define DATABASE_URL "******************" 
 
 /* 4. Define the user Email and password that already registered or added in your project */
-#define USER_EMAIL "*************"
-#define USER_PASSWORD "*****"
+#define USER_EMAIL "*********************"
+#define USER_PASSWORD "**********"
 
 // Define Firebase Data object
 FirebaseData fbdo;
@@ -34,6 +34,9 @@ const int gasPin = 36;
 const int irLedPin = 19;  // IR LED for window control
 const int relayPin = 14;  // Relay for humidity control
 DHT dht(4, DHT11);
+
+bool is_manual = false;
+bool manual_state = false;
 
 void setup() {
   pinMode(gasPin, INPUT);
@@ -85,46 +88,62 @@ void loop() {
   if (Firebase.ready() && (millis() - sendDataPrevMillis > 200 || sendDataPrevMillis == 0)) {
     sendDataPrevMillis = millis();
 
-    // Read raw analog value
-    int raw_adc = analogRead(gasPin);
-    Serial.print("Raw analog value: ");
-    Serial.println(raw_adc);
-
-    // Send raw analog value to Firebase
-    Firebase.RTDB.setInt(&fbdo, F("/house/raw_value"), raw_adc);
-
-    // Condition to control IR LED (window)
-    if (raw_adc > 700) { // Example threshold
-      digitalWrite(irLedPin, HIGH); // Open window
-      Serial.println("window ON");
-    } else if (raw_adc < 350) {
-      digitalWrite(irLedPin, LOW); // Close window
-      Serial.println("window OFF");
+    // Check manual control status
+    if (Firebase.RTDB.getBool(&fbdo, F("/house/is_manual"), &is_manual)) {
+      Serial.print("Manual mode: ");
+      Serial.println(is_manual);
     }
 
-    delay(100);
+    if (is_manual) {
+      // Manual control
+      if (Firebase.RTDB.getBool(&fbdo, F("/house/manual"), &manual_state)) {
+        digitalWrite(relayPin, manual_state ? HIGH : LOW);
+        Serial.print("Manual relay state: ");
+        Serial.println(manual_state ? "ON" : "OFF");
+      }
+    } else {
+      // Automatic mode
+      // Read raw analog value
+      int raw_adc = analogRead(gasPin);
+      Serial.print("Raw analog value: ");
+      Serial.println(raw_adc);
 
-    int h = dht.readHumidity();
-    int t = dht.readTemperature();
+      // Send raw analog value to Firebase
+      Firebase.RTDB.setInt(&fbdo, F("/house/raw_value"), raw_adc);
 
-    if (isnan(h) || isnan(t)) {
-      Serial.println(F("Failed to read from DHT sensor!"));
-      return;
-    }
+      // Condition to control IR LED (window)
+      if (raw_adc > 700) { // Example threshold
+        digitalWrite(irLedPin, HIGH); // Open window
+        Serial.println("window ON");
+      } else if (raw_adc < 350) {
+        digitalWrite(irLedPin, LOW); // Close window
+        Serial.println("window OFF");
+      }
 
-    // Send temperature and humidity to Firebase
-    Firebase.RTDB.setInt(&fbdo, F("/house/temp"), t);
-    Firebase.RTDB.setInt(&fbdo, F("/house/humidity"), h);
+      delay(100);
 
-    // Condition to control relay (humidity)
-    if (h <= 34) {
-      digitalWrite(relayPin, HIGH); // Turn on relay
-      Serial.println("Relay ON");
-      delay(40);
-    } else if (h >= 37) {
-      digitalWrite(relayPin, LOW); // Turn off relay
-      Serial.println("Relay OFF");
-      delay(40);
+      int h = dht.readHumidity();
+      int t = dht.readTemperature();
+
+      if (isnan(h) || isnan(t)) {
+        Serial.println(F("Failed to read from DHT sensor!"));
+        return;
+      }
+
+      // Send temperature and humidity to Firebase
+      Firebase.RTDB.setInt(&fbdo, F("/house/temp"), t);
+      Firebase.RTDB.setInt(&fbdo, F("/house/humidity"), h);
+
+      // Condition to control relay (humidity)
+      if (h <= 34) {
+        digitalWrite(relayPin, HIGH); // Turn on relay
+        Serial.println("Relay ON");
+        delay(40);
+      } else if (h >= 37) {
+        digitalWrite(relayPin, LOW); // Turn off relay
+        Serial.println("Relay OFF");
+        delay(40);
+      }
     }
   }
 }
