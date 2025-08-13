@@ -1,69 +1,69 @@
 # MQ2_DHT11_DIY_Room
 
-Этот проект предназначен для мониторинга температуры, влажности и уровня газа в помещении с использованием датчиков DHT11 и MQ-2. Он позволяет собирать данные с этих датчиков и отображать их через Telegram-бота, с возможностью обновления информации в реальном времени.
+This project is designed to monitor the temperature, humidity, and gas levels in a room using DHT11 and MQ-2 sensors. It allows you to collect data from these sensors and display it through a Telegram bot, with the ability to update information in real-time.
 
-## Описание
+## Description
 
-Проект использует ESP8266 для подключения к Wi-Fi и считывания данных с датчиков DHT11 (для температуры и влажности) и MQ-2 (для обнаружения газа). Затем эти данные передаются в Firebase Realtime Database и отображаются в Telegram-боте.
+The project uses the ESP8266 to connect to Wi-Fi and read data from the DHT11 (for temperature and humidity) and MQ-2 (for gas detection) sensors. These data are then transferred to the Firebase Realtime Database and displayed in the Telegram bot.
 
-### Возможности:
-- Чтение данных температуры, влажности и газа.
-- Отправка данных в Firebase.
-- Использование Telegram-бота для отображения данных с возможностью обновления через кнопки.
-- Редактирование сообщений в Telegram каждые 0.1 секунды для актуальности данных.
+### Features:
+- Reading temperature, humidity, and gas data.
+- Sending data to Firebase.
+- Using a Telegram bot to display data that can be updated via buttons.
+- Editing Telegram messages every 0.1 seconds to keep data up-to-date.
 
-## Требования
+## Requirements
 
 - **Hardware**:
-  - ESP8266 (или аналогичная плата с Wi-Fi)
-  - Датчик температуры и влажности DHT11
-  - Датчик газа MQ-2
+  - ESP8266 (or similar Wi-Fi board)
+  - DHT11 temperature and humidity sensor
+  - MQ-2 gas sensor
   
 - **Software**:
-  - Arduino IDE для программирования ESP8266
-  - Firebase аккаунт
+  - Arduino IDE for programming ESP8266
+  - Firebase account
   - Python 3.x
-  - Библиотеки: `aiogram`, `firebase-admin`, `asyncio`
+  - Libraries: `aiogram`, `firebase-admin`, `asyncio`
 
-## Установка
+## Installation
 
-1. **Настройка Firebase**:
-   - Создайте проект в [Firebase Console](https://console.firebase.google.com/).
-   - Добавьте Firebase Realtime Database в проект.
-   - Создайте сервисный аккаунт и получите файл `google-services.json`.
+1. **Setting up Firebase**:
+   - Create a project in the [Firebase Console](https://console.firebase.google.com/).
+   - Add the Firebase Realtime Database to the project.
+   - Create a service account and get the `google-services.json` file.
 
-2. **Подключение и настройка ESP8266**:
-   - Установите Arduino IDE и добавьте поддержку ESP8266.
-   - Подключите DHT11 и MQ-2 к ESP8266.
-   - Загрузите скетч для ESP8266, который будет считывать данные с датчиков и отправлять их в Firebase.
+2. **Connecting and configuring the ESP8266**:
+   - Install the Arduino IDE and add support for the ESP8266.
+   - Connect the DHT11 and MQ-2 to the ESP8266.
+   - Upload a sketch for the ESP8266 that will read data from the sensors and send it to Firebase.
 
-3. **Настройка Python-бота**:
-   - Установите все зависимости:
+3. **Configuring the Python bot**:
+   - Install all the dependencies:
      ```bash
      pip install aiogram firebase-admin
      ```
-   - Поместите файл `google-services.json` в ту же папку, что и Python-скрипт.
-   - Введите ваш **Telegram бот токен** в коде Python-бота.
-   - Запустите Python-скрипт:
+   - Place the `google-services.json` file in the same folder as the Python script.
+   - Enter your **Telegram bot token** in the Python bot code.
+   - Run the Python script:
      ```bash
      python bot.py
      ```
 
-## Использование
+## Usage
 
-1. Запустите Telegram-бота.
-2. Нажмите на кнопку "Узнать данные 💾", чтобы получить информацию о текущем состоянии:
-   - Влажность
-   - Температура
-   - Уровень газа
-3. Данные будут обновляться каждую 0.1 секунды.
+1. Launch the Telegram bot.
+2. Click on the "Get Data 💾" button to get information about the current status:
+   - Humidity
+   - Temperature
+   - Gas level
+3. The data will be updated every 0.1 seconds.
 
-## Структура проекта
+## Project structure
 
-- `bot.py` - Python-скрипт для работы с Telegram-ботом и Firebase.
-- `google-services.json` - Конфигурация для Firebase (необходимо для работы с Firebase SDK).
-- `esp8266_sketch.ino` - Arduino скетч для ESP8266, который считывает данные с датчиков и отправляет их в Firebase.
+- `bot.py` - Python script for working with Telegram bot and Firebase.
+- `google-services.json` - Configuration for Firebase (required to work with the Firebase SDK).
+- `esp8266_sketch.ino` - Arduino sketch for ESP8266 that reads data from sensors and sends it to Firebase.
 
-## Лицензия
+## License
 
-Этот проект лицензирован под MIT License. См. файл [LICENSE](LICENSE) для подробностей.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
